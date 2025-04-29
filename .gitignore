@@ -1,0 +1,155 @@
+# --- Python ---
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+# Usually these files are written by a python script from a template
+# before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# --- Django ---
+# SQLite database file (common for development)
+db.sqlite3
+db.sqlite3-journal
+
+# User-uploaded media files (should not be version controlled)
+# Ensure your MEDIA_ROOT ('media/' in your settings) is covered here.
+media/
+
+# Static files collected by 'collectstatic' (should not be version controlled)
+# Ensure your STATIC_ROOT ('staticfiles/' in your settings) is covered here.
+staticfiles/
+static_root/ # Another common name
+
+# Log files
+*.log
+logs/
+
+# Celery files (if you use Celery)
+celerybeat-schedule
+celerybeat.pid
+
+# --- Poetry ---
+# Poetry cache (usually outside project, but good practice)
+.poetry/cache/
+
+# --- IDEs / Editors ---
+# VS Code
+.vscode/
+# PyCharm
+.idea/
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+# Atom
+.atom/
+# Emacs
+*~
+# Vim
+*.swp
+*.swo
+
+# --- Operating System ---
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+# Thumbnails
+._*
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder/
+Temporary Items/
+.apdisk
+
+# Windows
+Thumbs.db
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# --- Secrets ---
+# Never commit secrets! Use environment variables or a secure secrets manager.
+*.pem
+*.key
+secrets.yml
+secrets.json
+*.env.* # e.g. .env.local, .env.development
+
+# --- Other ---
+# Output files from various tools
+*.out
+*.err
+

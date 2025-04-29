@@ -1,0 +1,18 @@
+[project]
+name = "job-portal-django"
+version = "0.1.0"
+description = "A full-featured job portal web application, allowing job seekers to find and apply for jobs, employers to post job listings, and administrators to manage the entire platform."
+authors = [
+    {name = "Piyush Kumar",email = "pgh5566@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "django (>=5.2,<6.0)",
+    "pillow (>=11.2.1,<12.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
