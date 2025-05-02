@@ -3,7 +3,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 # Import User model (assuming it's in 'auth' app)
-from auth.models import User
+from portal_auth.models import User
 
 class UserEditForm(forms.ModelForm):
     """

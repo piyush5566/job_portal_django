@@ -11,6 +11,10 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +24,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-zku0w^773vw7inpn&1eu^=!^qtwep%*@_)3&j#x_ri$%146srb'
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')  
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DJANGO_DEBUG').lower() in ('true', '1', 't', 'yes')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS').split(',') if os.getenv('DJANGO_ALLOWED_HOSTS') else []
 
 
 # Application definition
@@ -126,6 +130,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
+
 STATIC_URL = 'static/'
 # Directory where collectstatic will gather static files for deployment
 STATIC_ROOT = BASE_DIR / 'staticfiles'
@@ -143,20 +148,24 @@ MEDIA_ROOT = BASE_DIR / 'media' # Where user uploads will be stored locally
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Email Configuration (Example using console backend for testing)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-# For Gmail (less secure, use App Passwords if needed):
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.gmail.com'
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = 'your_email@gmail.com'
-# EMAIL_HOST_PASSWORD = 'your_app_password'
-DEFAULT_FROM_EMAIL = 'webmaster@localhost' # Or your actual from address
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend' # Or console backend for dev: 'django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587)) # Default to 587
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() in ('true', '1', 't', 'yes')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'webmaster@localhost')
+
 CONTACT_EMAIL_RECIPIENT = 'your_contact_address@example.com' # Your contact form destination
 
+# --- Max Upload Size (from Flask MAX_CONTENT_LENGTH) ---
+# Max size (in bytes) before uploading to temp file (default 2.5MB)
+FILE_UPLOAD_MAX_MEMORY_SIZE = 16 * 1024 * 1024 # 16 MB (matches Flask config)
+# Max size (in bytes) for the entire request body (default 2.5MB)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 16 * 1024 * 1024 # 16 MB
+
 # Login URLs
-LOGIN_URL = 'auth:login' # Name of the login URL pattern
+LOGIN_URL = 'portal_auth:login' # Name of the login URL pattern
 LOGIN_REDIRECT_URL = 'main:index' # Where to redirect after successful login if no 'next' param
 LOGOUT_REDIRECT_URL = 'main:index' # Where to redirect after logout
 

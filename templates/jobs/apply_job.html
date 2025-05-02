@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-primary text-white text-center py-4">
+                    <h3 class="mb-0">Apply for {{ job.title }}</h3>
+                    <p class="mb-0">at {{ job.company }} - {{ job.location }}</p>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {# Render non-field errors if any #}
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="mb-4">
+                            <p>Please upload your resume (PDF, DOC, DOCX only).</p>
+                            {{ form.resume.label_tag }}
+                            {{ form.resume }}
+                            {% if form.resume.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.resume.errors|striptags }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">Submit Application</button> {# Changed button text #}
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-center py-3">
+                    <a href="{% url 'jobs:detail' job.id %}" class="btn btn-secondary">Cancel</a> {# Assuming 'jobs:detail' URL name #}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

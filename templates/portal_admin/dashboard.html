@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5"> {# Added container for consistent padding #}
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1>Admin Dashboard</h1>
+            <p>Welcome to the admin panel where you can manage users, jobs, and applications.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">User Management</h5>
+                    <p class="card-text">Manage all registered users</p>
+                    <a href="{% url 'portal_admin:users' %}" class="btn btn-primary">Manage Users</a> {# Assuming 'portal_admin:users' URL name #}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Job Management</h5>
+                    <p class="card-text">Manage all available jobs</p>
+                    <a href="{% url 'portal_admin:jobs' %}" class="btn btn-primary">Manage Jobs</a> {# Assuming 'portal_admin:jobs' URL name #}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Application Management</h5>
+                    <p class="card-text">View all job applications</p>
+                    <a href="{% url 'portal_admin:applications' %}" class="btn btn-primary">View Applications</a> {# Assuming 'portal_admin:applications' URL name #}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

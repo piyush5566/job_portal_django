@@ -68,7 +68,7 @@ def register_view(request):
                     user.save()
                     logger.info(f"New user registered: ID {user.id}, Email {email}, Role {user.role}")
                     messages.success(request, 'Registration successful! Please login.')
-                    return redirect('auth:login')
+                    return redirect('portal_auth:login')
             except Exception as e:
                 logger.error(f"Registration failed due to an unexpected error for email {email}: {str(e)}")
                 messages.error(request, f'Registration failed due to an unexpected error.')
@@ -80,7 +80,7 @@ def register_view(request):
                      messages.error(request, f"{field.replace('_', ' ').title()}: {error}")
     else:
         form = RegistrationForm()
-    return render(request, 'auth/register.html', {'form': form})
+    return render(request, 'portal_auth/register.html', {'form': form})
 
 
 def login_view(request):
@@ -128,7 +128,7 @@ def login_view(request):
              messages.error(request, 'Please correct the errors below.')
     else:
         form = LoginForm()
-    return render(request, 'auth/login.html', {'form': form})
+    return render(request, 'portal_auth/login.html', {'form': form})
 
 
 def logout_view(request):
@@ -179,7 +179,7 @@ def profile_view(request):
                 updated_user = form.save()
                 logger.info(f"Profile updated successfully for user {user.id}. Changes: username: {old_username}->{updated_user.username}, email: {old_email}->{updated_user.email}, picture_updated: {picture_changed}")
                 messages.success(request, 'Your profile has been updated!')
-                return redirect('auth:profile') # Redirect back to profile page
+                return redirect('portal_auth:profile') # Redirect back to profile page
             except Exception as e:
                  logger.error(f"An error occurred while updating profile for user {user.id}: {str(e)}")
                  messages.error(request, f'An error occurred while updating your profile.')
@@ -194,4 +194,4 @@ def profile_view(request):
         form = ProfileForm(instance=user)
 
     # Pass user separately if needed by template beyond form context
-    return render(request, 'auth/profile.html', {'form': form, 'user': user})
+    return render(request, 'portal_auth/profile.html', {'form': form, 'user': user})

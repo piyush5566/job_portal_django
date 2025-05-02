@@ -22,11 +22,11 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', django_admin.site.urls), # Django's built-in admin
     path('', include('main.urls')),
-    path('auth/', include('auth.urls')),
+    path('auth/', include('portal_auth.urls')),
     path('jobs/', include('jobs.urls')),
     path('employer/', include('employer.urls')),
-    path('jobseeker/', include('job_seeker.urls')),
-    path('sysadmin/', include('admin.urls')), # Your custom admin section
+    path('jobseeker/', include('job_seeker.urls')), # Corrected name
+    path('sysadmin/', include('portal_admin.urls')), # Your custom admin section
     path('utils/', include('utils.urls')),
 ]
 
@@ -34,4 +34,3 @@ urlpatterns = [
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-

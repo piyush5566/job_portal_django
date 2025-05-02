@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-5">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-primary text-white text-center py-4">
+                    <h3 class="mb-0">Welcome Back</h3>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    <form method="POST">
+                        {% csrf_token %}
+                        {# Render non-field errors if any #}
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <div class="mb-4">
+                            {{ form.username.label_tag }} {# Django uses 'username' by default #}
+                            {{ form.username }} {# Add class="form-control" in Form definition or use widget_tweaks #}
+                            {% if form.username.errors %}<div class="text-danger">{{ form.username.errors|striptags }}</div>{% endif %}
+                        </div>
+                        <div class="mb-4">
+                            {{ form.password.label_tag }}
+                            {{ form.password }} {# Add class="form-control" in Form definition or use widget_tweaks #}
+                            {% if form.password.errors %}<div class="text-danger">{{ form.password.errors|striptags }}</div>{% endif %}
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">Login</button> {# Changed button text #}
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-center py-3">
+                    <div class="small">Don't have an account? <a href="{% url 'portal_auth:register' %}">Register now</a></div> {# Assuming 'portal_auth:register' URL name #}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

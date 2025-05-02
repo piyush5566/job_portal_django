@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block hero %}
+<!-- Header Start -->
+<div class="container-xxl py-5 bg-dark page-header mb-5">
+    <div class="container my-5 pt-5 pb-4">
+        <h1 class="display-3 text-white mb-3 animated slideInDown">My Jobs</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb text-uppercase">
+                <li class="breadcrumb-item"><a href="{% url 'main:index' %}">Home</a></li>
+                <li class="breadcrumb-item text-white active" aria-current="page">My Jobs</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+<!-- Header End -->
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    {% if jobs %}
+    <div class="row">
+        {% for job in jobs %}
+        <div class="col-lg-12 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-2">
+                            {% if job.company_logo %}
+                            <img class="img-fluid rounded" src="{{ job.company_logo.url }}"
+                                alt="{{ job.company }} logo" style="max-height: 80px;"> {# Assuming ImageField #}
+                            {% else %}
+                            <img class="img-fluid rounded" src="{% static 'img/default_company_logo.png'' %}"
+                                alt="{{ job.company }} logo" style="max-height: 80px;"> {# Default logo #}
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="card-title mb-1">{{ job.title }}</h5>
+                            <p class="card-text mb-1">
+                                <i class="fa fa-building text-primary me-2"></i>{{ job.company }}
+                            </p>
+                            <p class="card-text mb-1">
+                                <i class="fa fa-map-marker-alt text-primary me-2"></i>{{ job.location }}
+                            </p>
+                            <small class="text-muted">
+                                <i class="far fa-calendar-alt text-primary me-2"></i>
+                                Posted on {{ job.posted_date|date:"Y-m-d" }}
+                            </small>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{% url 'employer:job_applications' job.id %}" class="btn btn-primary mb-2"> {# Assuming 'employer:job_applications' URL name #}
+                                <i class="fa fa-users me-2"></i>
+                                View Applications ({{ job.application_count|default:0 }}) {# Assuming application_count available #}
+                            </a>
+                            <form method="POST" action="{% url 'employer:delete_job' job.id %}" {# Assuming 'employer:delete_job' URL name #}
+                                class="d-inline-block">
+                                {% csrf_token %}
+                                {# Use a separate form object for delete if needed, or just CSRF token #}
+                                <button type="submit" class="btn btn-danger mb-2"
+                                    onclick="return confirm('Are you sure you want to delete this job? This will also delete all applications.')">
+                                    <i class="fa fa-trash me-2"></i>Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <h4 class="mb-4">You have not posted any jobs yet.</h4>
+        <a href="{% url 'employer:new_job' %}" class="btn btn-primary"> {# Assuming 'employer:new_job' URL name #}
+            <i class="fa fa-plus me-2"></i>Post a New Job
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

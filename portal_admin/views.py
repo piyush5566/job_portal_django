@@ -6,15 +6,15 @@ from django.http import Http404
 import logging # Import logging
 
 # Import models from relevant apps
-from auth.models import User
+from portal_auth.models import User
 from jobs.models import Job, Application
 # Import forms from relevant apps
-from auth.forms import AdminRegistrationForm # Assuming UserEditForm is in auth
+from portal_auth.forms import AdminRegistrationForm # Assuming UserEditForm is in auth
 # Need UserEditForm from auth/forms.py
-from auth.forms import UserEditForm
+from portal_admin.forms import UserEditForm
 from employer.forms import JobForm, ApplicationStatusForm # JobForm from employer
 # Import decorators from auth app
-from auth.views import login_required, role_required
+from portal_auth.views import login_required, role_required
 
 logger = logging.getLogger(__name__) # Get logger for this module
 
@@ -78,7 +78,7 @@ def admin_new_user_view(request):
                     new_user.save()
                     logger.info(f"Admin {admin_user.id} created new user: ID {new_user.id} ({username}, {email}) with role {role}")
                     messages.success(request, f'User "{username}" created successfully.')
-                    return redirect('custom_admin:admin_users')
+                    return redirect('custom_portal_admin:admin_users')
             except Exception as e:
                 logger.error(f"Admin {admin_user.id} failed to create user ({email}): {str(e)}")
                 messages.error(request, f'Failed to create user.')
@@ -115,7 +115,7 @@ def admin_edit_user_view(request, user_id):
                 updated_user = form.save()
                 logger.info(f"Admin {admin_user.id} updated user {user_id}. Changes: username: {old_username}->{new_username}, email: {old_email}->{new_email}, role: {old_role}->{new_role}")
                 messages.success(request, f'User "{updated_user.username}" updated successfully.')
-                return redirect('custom_admin:admin_users')
+                return redirect('custom_portal_admin:admin_users')
             except Exception as e:
                 logger.error(f"Admin {admin_user.id} failed to update user {user_id}: {str(e)}")
                 messages.error(request, f'Failed to update user.')
@@ -146,7 +146,7 @@ def admin_delete_user_view(request, user_id):
     if user_to_delete == admin_user:
         logger.warning(f"Admin {admin_user.id} attempted self-deletion (user {user_id}). Denied.")
         messages.error(request, 'You cannot delete your own account.')
-        return redirect('custom_admin:admin_users')
+        return redirect('custom_portal_admin:admin_users')
 
     try:
         username = user_to_delete.username
@@ -159,7 +159,7 @@ def admin_delete_user_view(request, user_id):
         logger.error(f"Admin {admin_user.id} failed to delete user {user_id}: {str(e)}")
         messages.error(request, f'Failed to delete user.')
 
-    return redirect('custom_admin:admin_users')
+    return redirect('custom_portal_admin:admin_users')
 
 
 # --- Job Management ---
@@ -193,7 +193,7 @@ def admin_create_job_view(request):
                 job.save()
                 logger.info(f"Admin {admin_user.id} created new job ID {job.id} ('{job.title}')")
                 messages.success(request, f'Job "{job.title}" created successfully.')
-                return redirect('custom_admin:admin_jobs')
+                return redirect('custom_portal_admin:admin_jobs')
             except Exception as e:
                 logger.error(f"Admin {admin_user.id} failed to create job: {str(e)}")
                 messages.error(request, f'Failed to create job.')
@@ -223,7 +223,7 @@ def admin_edit_job_view(request, job_id):
                 updated_job = form.save()
                 logger.info(f"Admin {admin_user.id} updated job {job_id} ('{updated_job.title}')")
                 messages.success(request, f'Job "{updated_job.title}" updated successfully.')
-                return redirect('custom_admin:admin_jobs')
+                return redirect('custom_portal_admin:admin_jobs')
             except Exception as e:
                 logger.error(f"Admin {admin_user.id} failed to update job {job_id}: {str(e)}")
                 messages.error(request, f'Failed to update job.')
@@ -261,7 +261,7 @@ def admin_delete_job_view(request, job_id):
         logger.error(f"Admin {admin_user.id} failed to delete job {job_id}: {str(e)}")
         messages.error(request, f'Failed to delete job.')
 
-    return redirect('custom_admin:admin_jobs')
+    return redirect('custom_portal_admin:admin_jobs')
 
 
 # --- Application Management ---
@@ -308,5 +308,5 @@ def admin_update_application_view(request, application_id):
         logger.warning(f"Admin {admin_user.id} invalid status update attempt for application {application_id}: {form.errors}")
         messages.error(request, 'Invalid status submitted.')
 
-    return redirect('custom_admin:admin_applications')
+    return redirect('custom_portal_admin:admin_applications')
 

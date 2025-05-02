@@ -5,7 +5,7 @@ import logging # Import logging
 # Import models from the 'jobs' app
 from jobs.models import Application
 # Import decorators from auth app
-from auth.views import login_required, role_required
+from portal_auth.views import login_required, role_required
 
 logger = logging.getLogger(__name__) # Get logger for this module
 

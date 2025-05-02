@@ -1,4 +1,4 @@
-# admin/urls.py (Your custom admin section)
+# /home/gagan/job_portal/job_portal_django/portal_admin/urls.py (Your custom admin section)
 from django.urls import path
 from . import views # Assuming you create admin/views.py
 
@@ -17,4 +17,3 @@ urlpatterns = [
     path('applications/', views.admin_applications_view, name='admin_applications'),
     path('applications/<int:application_id>/update/', views.admin_update_application_view, name='admin_update_application'),
 ]
-

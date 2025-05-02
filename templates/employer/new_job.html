@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-primary text-white text-center py-4">
+                    <h3 class="mb-0">Post a New Job</h3>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    <form method="POST" enctype="multipart/form-data" action="{% url 'employer:new_job' %}"> {# Assuming 'employer:new_job' URL name #}
+                        {% csrf_token %}
+                        {# Render non-field errors if any #}
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            {{ form.title.label_tag }}
+                            {{ form.title }} {# Add class="form-control" in Form definition or use widget_tweaks #}
+                            {% if form.title.errors %}<div class="text-danger">{{ form.title.errors|striptags }}</div>{% endif %}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.company.label_tag }}
+                            {{ form.company }} {# Add class="form-control" #}
+                            {% if form.company.errors %}<div class="text-danger">{{ form.company.errors|striptags }}</div>{% endif %}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.company_logo.label_tag }}
+                            <small class="text-muted d-block mb-2">(Optional: jpg, png, jpeg)</small>
+                            {{ form.company_logo }} {# Add class="form-control" #}
+                            {% if form.company_logo.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.company_logo.errors|striptags }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.description.label_tag }}
+                            {{ form.description }} {# Add class="form-control", rows="5" #}
+                            {% if form.description.errors %}<div class="text-danger">{{ form.description.errors|striptags }}</div>{% endif %}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.salary.label_tag }}
+                            {{ form.salary }} {# Add class="form-control" #}
+                             {% if form.salary.errors %}<div class="text-danger">{{ form.salary.errors|striptags }}</div>{% endif %}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.location.label_tag }}
+                            {{ form.location }} {# Add class="form-control" #}
+                             {% if form.location.errors %}<div class="text-danger">{{ form.location.errors|striptags }}</div>{% endif %}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.category.label_tag }}
+                            {{ form.category }} {# Add class="form-control" #}
+                             {% if form.category.errors %}<div class="text-danger">{{ form.category.errors|striptags }}</div>{% endif %}
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">Post Job</button> {# Changed button text #}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

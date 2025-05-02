@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h1 class="text-center mb-4">User Profile</h1>
+
+                        <div class="text-center mb-4">
+                            {% if request.user.profile_picture %}
+                                <img src="{{ request.user.profile_picture.url }}" alt="Profile Picture" {# Assuming ImageField #}
+                                    class="img-thumbnail rounded-circle"
+                                    style="width: 150px; height: 150px; object-fit: cover;">
+                            {% else %}
+                                <img src="{% static 'img/default_user_profile.jpg' %}" alt="Profile Picture"
+                                    class="img-thumbnail rounded-circle"
+                                    style="width: 150px; height: 150px; object-fit: cover;">
+                            {% endif %}
+                        </div>
+
+                        <form method="POST" enctype="multipart/form-data" action="{% url 'portal_auth:profile' %}"> {# Assuming 'portal_auth:profile' URL name #}
+                            {% csrf_token %}
+                            {# Render non-field errors if any #}
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-danger">
+                                    {% for error in form.non_field_errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            <div class="mb-3">
+                                {{ form.username.label_tag }}
+                                {{ form.username }} {# Add class="form-control" #}
+                                {% if form.username.errors %}
+                                <span class="text-danger">{{ form.username.errors|striptags }}</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form.email.label_tag }}
+                                {{ form.email }} {# Add class="form-control" #}
+                                {% if form.email.errors %}
+                                <span class="text-danger">{{ form.email.errors|striptags }}</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form.profile_picture.label_tag }}
+                                <small class="text-muted">(Optional: jpg, png, jpeg)</small>
+                                {{ form.profile_picture }} {# Add class="form-control" #}
+                                {% if form.profile_picture.errors %}
+                                <span class="text-danger">{{ form.profile_picture.errors|striptags }}</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">Update Profile</button> {# Changed button text #}
+                            </div>
+                        </form>
+
+                        <hr>
+                        <p class="text-center text-muted">Role: {{ request.user.role|default:"N/A"|title }}</p> {# Assuming role field exists #}
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-primary text-white text-center py-4">
+                    <h3 class="mb-0">Create New Account</h3>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    <form method="POST" novalidate>
+                        {% csrf_token %}
+                        {# Render non-field errors if any #}
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                {{ form.username.label_tag }}
+                                {{ form.username }} {# Add class="form-control" #}
+                                {% if form.username.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.username.errors|striptags }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.email.label_tag }}
+                                {{ form.email }} {# Add class="form-control" #}
+                                {% if form.email.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.email.errors|striptags }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                {{ form.password.label_tag }} {# Use password field from Django Auth form #}
+                                {{ form.password }} {# Add class="form-control" #}
+                                {% if form.password.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.password.errors|striptags }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.confirm_password.label_tag }} {# Use password2 field from Django Auth form #}
+                                {{ form.confirm_password }} {# Add class="form-control" #}
+                                {% if form.confirm_password.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.confirm_password.errors|striptags }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            {{ form.role.label_tag }}
+                            {{ form.role }} {# Add class="form-select" #}
+                            {% if form.role.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.role.errors|striptags }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">Register</button> {# Changed button text #}
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-center py-3">
+                    <div class="small">Already have an account? <a href="{% url 'portal_auth:login' %}">Login here</a></div> {# Assuming 'portal_auth:login' URL name #}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

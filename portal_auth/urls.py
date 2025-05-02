@@ -2,7 +2,7 @@
 from django.urls import path
 from . import views
 
-app_name = 'auth' # Namespace for URLs
+app_name = 'portal_auth' # Namespace for URLs
 
 urlpatterns = [
     path('register/', views.register_view, name='register'),

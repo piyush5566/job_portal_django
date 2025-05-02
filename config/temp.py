@@ -112,7 +112,7 @@ DEFAULT_FROM_EMAIL = 'webmaster@localhost' # Or your actual from address
 CONTACT_EMAIL_RECIPIENT = 'your_contact_address@example.com' # Your contact form destination
 
 # Login URLs
-LOGIN_URL = 'auth:login' # Name of the login URL pattern
+LOGIN_URL = 'portal_auth:login' # Name of the login URL pattern
 LOGIN_REDIRECT_URL = 'main:index' # Where to redirect after successful login if no 'next' param
 LOGOUT_REDIRECT_URL = 'main:index' # Where to redirect after logout
 

@@ -12,7 +12,7 @@ from .models import Job, Application
 # Import forms from the current app
 from .forms import ApplicationForm
 # Import decorators from auth app
-from auth.views import login_required, role_required
+from portal_auth.views import login_required, role_required
 from utils.utils import upload_to_gcs # Import GCS upload utility function
 logger = logging.getLogger(__name__) # Setup logger for this module
 # --- Views ---
@@ -48,7 +48,7 @@ def jobs_list_view(request):
         'search_category': category,
         'search_company': company,
     }
-    return render(request, 'jobs/jobs.html', context)
+    return render(request, 'jobs/list.html', context)
 
 
 def search_jobs_api_view(request):
