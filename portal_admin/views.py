@@ -34,7 +34,7 @@ def admin_dashboard_view(request):
         'job_count': job_count,
         'app_count': app_count,
     }
-    return render(request, 'admin/dashboard.html', context)
+    return render(request, 'portal_admin/dashboard.html', context)
 
 
 # --- User Management ---
@@ -48,7 +48,7 @@ def admin_users_view(request):
     users = User.objects.all().order_by('id')
     logger.info(f"Retrieved {users.count()} users for admin view")
     context = {'users': users}
-    return render(request, 'admin/users.html', context)
+    return render(request, 'portal_admin/users.html', context)
 
 
 @login_required
@@ -78,7 +78,7 @@ def admin_new_user_view(request):
                     new_user.save()
                     logger.info(f"Admin {admin_user.id} created new user: ID {new_user.id} ({username}, {email}) with role {role}")
                     messages.success(request, f'User "{username}" created successfully.')
-                    return redirect('custom_portal_admin:admin_users')
+                    return redirect('portal_admin:admin_users')
             except Exception as e:
                 logger.error(f"Admin {admin_user.id} failed to create user ({email}): {str(e)}")
                 messages.error(request, f'Failed to create user.')
@@ -87,7 +87,7 @@ def admin_new_user_view(request):
             messages.error(request, 'Please correct the errors below.')
     else:
         form = AdminRegistrationForm()
-    return render(request, 'admin/new_user.html', {'form': form})
+    return render(request, 'portal_admin/new_user.html', {'form': form})
 
 
 @login_required
@@ -115,7 +115,7 @@ def admin_edit_user_view(request, user_id):
                 updated_user = form.save()
                 logger.info(f"Admin {admin_user.id} updated user {user_id}. Changes: username: {old_username}->{new_username}, email: {old_email}->{new_email}, role: {old_role}->{new_role}")
                 messages.success(request, f'User "{updated_user.username}" updated successfully.')
-                return redirect('custom_portal_admin:admin_users')
+                return redirect('portal_admin:admin_users')
             except Exception as e:
                 logger.error(f"Admin {admin_user.id} failed to update user {user_id}: {str(e)}")
                 messages.error(request, f'Failed to update user.')
@@ -126,7 +126,7 @@ def admin_edit_user_view(request, user_id):
         # GET request: pre-populate form
         form = UserEditForm(instance=user_to_edit)
 
-    return render(request, 'admin/edit_user.html', {'form': form, 'user_to_edit': user_to_edit})
+    return render(request, 'portal_admin/edit_user.html', {'form': form, 'user_to_edit': user_to_edit})
 
 
 @login_required
@@ -146,7 +146,7 @@ def admin_delete_user_view(request, user_id):
     if user_to_delete == admin_user:
         logger.warning(f"Admin {admin_user.id} attempted self-deletion (user {user_id}). Denied.")
         messages.error(request, 'You cannot delete your own account.')
-        return redirect('custom_portal_admin:admin_users')
+        return redirect('portal_admin:admin_users')
 
     try:
         username = user_to_delete.username
@@ -159,7 +159,7 @@ def admin_delete_user_view(request, user_id):
         logger.error(f"Admin {admin_user.id} failed to delete user {user_id}: {str(e)}")
         messages.error(request, f'Failed to delete user.')
 
-    return redirect('custom_portal_admin:admin_users')
+    return redirect('portal_admin:admin_users')
 
 
 # --- Job Management ---
@@ -173,7 +173,7 @@ def admin_jobs_view(request):
     jobs = Job.objects.select_related('poster').order_by('-posted_date')
     logger.info(f"Retrieved {jobs.count()} jobs for admin view")
     context = {'jobs': jobs}
-    return render(request, 'admin/jobs.html', context)
+    return render(request, 'portal_admin/jobs.html', context)
 
 
 @login_required
@@ -193,7 +193,7 @@ def admin_create_job_view(request):
                 job.save()
                 logger.info(f"Admin {admin_user.id} created new job ID {job.id} ('{job.title}')")
                 messages.success(request, f'Job "{job.title}" created successfully.')
-                return redirect('custom_portal_admin:admin_jobs')
+                return redirect('portal_admin:admin_jobs')
             except Exception as e:
                 logger.error(f"Admin {admin_user.id} failed to create job: {str(e)}")
                 messages.error(request, f'Failed to create job.')
@@ -202,7 +202,7 @@ def admin_create_job_view(request):
             messages.error(request, 'Please correct the errors below.')
     else:
         form = JobForm()
-    return render(request, 'admin/create_job.html', {'form': form})
+    return render(request, 'portal_admin/create_job.html', {'form': form})
 
 
 @login_required
@@ -223,7 +223,7 @@ def admin_edit_job_view(request, job_id):
                 updated_job = form.save()
                 logger.info(f"Admin {admin_user.id} updated job {job_id} ('{updated_job.title}')")
                 messages.success(request, f'Job "{updated_job.title}" updated successfully.')
-                return redirect('custom_portal_admin:admin_jobs')
+                return redirect('portal_admin:admin_jobs')
             except Exception as e:
                 logger.error(f"Admin {admin_user.id} failed to update job {job_id}: {str(e)}")
                 messages.error(request, f'Failed to update job.')
@@ -234,7 +234,7 @@ def admin_edit_job_view(request, job_id):
         # GET request
         form = JobForm(instance=job_to_edit)
 
-    return render(request, 'admin/edit_job.html', {'form': form, 'job': job_to_edit})
+    return render(request, 'portal_admin/edit_job.html', {'form': form, 'job': job_to_edit})
 
 
 @login_required
@@ -261,7 +261,7 @@ def admin_delete_job_view(request, job_id):
         logger.error(f"Admin {admin_user.id} failed to delete job {job_id}: {str(e)}")
         messages.error(request, f'Failed to delete job.')
 
-    return redirect('custom_portal_admin:admin_jobs')
+    return redirect('portal_admin:admin_jobs')
 
 
 # --- Application Management ---
@@ -275,7 +275,7 @@ def admin_applications_view(request):
     applications = Application.objects.select_related('job', 'applicant').order_by('-application_date')
     logger.info(f"Retrieved {applications.count()} applications for admin view")
     context = {'applications': applications}
-    return render(request, 'admin/applications.html', context)
+    return render(request, 'portal_admin/applications.html', context)
 
 
 @login_required
@@ -308,5 +308,5 @@ def admin_update_application_view(request, application_id):
         logger.warning(f"Admin {admin_user.id} invalid status update attempt for application {application_id}: {form.errors}")
         messages.error(request, 'Invalid status submitted.')
 
-    return redirect('custom_portal_admin:admin_applications')
+    return redirect('portal_admin:admin_applications')
 

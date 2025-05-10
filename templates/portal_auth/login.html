@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load widget_tweaks %}
 
 {% block content %}
 <div class="container py-5">
@@ -21,22 +22,22 @@
                             </div>
                         {% endif %}
                         <div class="mb-4">
-                            {{ form.username.label_tag }} {# Django uses 'username' by default #}
-                            {{ form.username }} {# Add class="form-control" in Form definition or use widget_tweaks #}
-                            {% if form.username.errors %}<div class="text-danger">{{ form.username.errors|striptags }}</div>{% endif %}
+                            <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }}</label>
+                            {% render_field form.email class="form-control" placeholder="Enter your email" %}
+                            {% if form.email.errors %}<div class="text-danger">{{ form.email.errors|striptags }}</div>{% endif %}
                         </div>
                         <div class="mb-4">
-                            {{ form.password.label_tag }}
-                            {{ form.password }} {# Add class="form-control" in Form definition or use widget_tweaks #}
+                            <label for="{{ form.password.id_for_label }}" class="form-label">{{ form.password.label }}</label>
+                            {% render_field form.password class="form-control" placeholder="Enter your password" %}
                             {% if form.password.errors %}<div class="text-danger">{{ form.password.errors|striptags }}</div>{% endif %}
                         </div>
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-lg">Login</button> {# Changed button text #}
+                            <button type="submit" class="btn btn-primary btn-lg">Login</button>
                         </div>
                     </form>
                 </div>
                 <div class="card-footer text-center py-3">
-                    <div class="small">Don't have an account? <a href="{% url 'portal_auth:register' %}">Register now</a></div> {# Assuming 'portal_auth:register' URL name #}
+                    <div class="small">Don't have an account? <a href="{% url 'portal_auth:register' %}">Register now</a></div>
                 </div>
             </div>
         </div>

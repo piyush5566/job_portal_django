@@ -30,6 +30,8 @@ def index_view(request):
     job_categories = Job.objects.values('category').annotate(
         count=Count('id')
     ).order_by('-count', 'category')
+    logger.info(f"Featured jobs: {featured_jobs}")
+    logger.info(f"Job categories: {job_categories}")
 
     context = {
         'featured_jobs': featured_jobs,

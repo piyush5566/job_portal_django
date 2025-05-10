@@ -27,7 +27,7 @@ def post_job_redirect_view(request):
     if user.role == 'admin':
         logger.info(f"Admin {user.id} redirected from post_job_redirect to admin job creation")
         messages.info(request, 'As an admin, you can create jobs through the admin interface.')
-        return redirect('custom_portal_admin:admin_create_job')
+        return redirect('portal_admin:admin_create_job')
     else: # Employer
         logger.info(f"Employer {user.id} redirected from post_job_redirect to new_job form")
         return redirect('employer:new_job')
@@ -77,7 +77,7 @@ def new_job_view(request):
                 if user.role == 'employer':
                     return redirect('employer:my_jobs')
                 else: # Admin
-                    return redirect('custom_portal_admin:admin_jobs') # Redirect admin to their job list
+                    return redirect('portal_admin:admin_jobs') # Redirect admin to their job list
 
             except Exception as e:
                 logger.error(f"Error creating job for user {user.id}: {str(e)}")
@@ -178,7 +178,7 @@ def delete_job_view(request, job_id):
     if user.role == 'employer':
         return redirect('employer:my_jobs')
     else: # Admin
-        return redirect('custom_portal_admin:admin_jobs')
+        return redirect('portal_admin:admin_jobs')
 
 
 @login_required
@@ -226,5 +226,5 @@ def update_application_status_view(request, application_id):
     if user.role == 'employer':
         return redirect('employer:job_applications', job_id=job.id)
     else: # Admin
-        return redirect('custom_portal_admin:admin_applications')
+        return redirect('portal_admin:admin_applications')
 

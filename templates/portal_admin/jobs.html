@@ -9,8 +9,8 @@
             <h1>Job Management</h1>
             <p>Manage all jobs in the system.</p>
             <div class="d-flex gap-2 mb-3">
-                <a href="{% url 'portal_admin:dashboard' %}" class="btn btn-secondary mb-3">Back to Dashboard</a> {# Assuming 'portal_admin:dashboard' URL name #}
-                <a href="{% url 'portal_admin:create_job' %}" class="btn btn-success mb-3 ms-2"> {# Assuming 'portal_admin:create_job' URL name #}
+                <a href="{% url 'portal_admin:admin_dashboard' %}" class="btn btn-secondary mb-3">Back to Dashboard</a> {# Assuming 'portal_admin:admin_dashboard' URL name #}
+                <a href="{% url 'portal_admin:admin_create_job' %}" class="btn btn-success mb-3 ms-2"> {# Assuming 'portal_admin:admin_create_job' URL name #}
                     <i class="fas fa-plus me-2"></i>Create New Job
                 </a>
             </div>
@@ -44,9 +44,9 @@
                             <td>{{ job.poster.username }}</td> {# Assuming poster is a FK to User #}
                             <td>{{ job.posted_date|date:"Y-m-d" }}</td>
                             <td>
-                                <a href="{% url 'jobs:detail' job.id %}" class="btn btn-sm btn-info">View</a> {# Assuming 'jobs:detail' URL name #}
-                                <a href="{% url 'portal_admin:edit_job' job.id %}" class="btn btn-sm btn-primary">Edit</a> {# Assuming 'portal_admin:edit_job' URL name #}
-                                <form action="{% url 'portal_admin:delete_job' job.id %}" method="POST" class="d-inline"> {# Assuming 'portal_admin:delete_job' URL name #}
+                                <a href="{% url 'jobs:job_detail' job.id %}" class="btn btn-sm btn-info">View</a> {# Assuming 'jobs:job_detail' URL name #}
+                                <a href="{% url 'portal_admin:admin_edit_job' job.id %}" class="btn btn-sm btn-primary">Edit</a> {# Assuming 'portal_admin:admin_edit_job' URL name #}
+                                <form action="{% url 'portal_admin:admin_delete_job' job.id %}" method="POST" class="d-inline"> {# Assuming 'portal_admin:admin_delete_job' URL name #}
                                     {% csrf_token %}
                                     {# Use a separate form object for delete if needed, or just CSRF token #}
                                     <button type="submit" class="btn btn-sm btn-danger"

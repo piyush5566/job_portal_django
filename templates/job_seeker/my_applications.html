@@ -45,7 +45,7 @@
                             </span>
                         </div>
                         <div class="col-md-3 text-md-end">
-                            <a href="{% url 'jobs:detail' application.job.id %}" class="btn btn-info mb-2"> {# Assuming 'jobs:detail' URL name #}
+                            <a href="{% url 'jobs:job_detail' application.job.id %}" class="btn btn-info mb-2"> {# Assuming 'jobs:job_detail' URL name #}
                                 <i class="fa fa-eye me-2"></i>View Job
                             </a>
                             {% if application.resume_path %}

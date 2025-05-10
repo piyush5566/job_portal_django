@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load widget_tweaks %}
 
 {% block content %}
 <div class="container py-5">
@@ -23,60 +24,70 @@
 
                         <div class="row mb-3">
                             <div class="col-md-6 mb-3 mb-md-0">
-                                {{ form.username.label_tag }}
-                                {{ form.username }} {# Add class="form-control" #}
+                                <label for="{{ form.username.id_for_label }}" class="form-label">{{ form.username.label }}</label>
                                 {% if form.username.errors %}
-                                    <div class="invalid-feedback d-block">
+                                    {% render_field form.username class="form-control is-invalid" placeholder="Choose a username" autocomplete="username" %}
+                                    <div class="invalid-feedback">
                                         {{ form.username.errors|striptags }}
                                     </div>
+                                {% else %}
+                                    {% render_field form.username class="form-control" placeholder="Choose a username" autocomplete="username" %}
                                 {% endif %}
                             </div>
                             <div class="col-md-6">
-                                {{ form.email.label_tag }}
-                                {{ form.email }} {# Add class="form-control" #}
+                                <label for="{{ form.email.id_for_label }}" class="form-label">{{ form.email.label }}</label>
                                 {% if form.email.errors %}
-                                    <div class="invalid-feedback d-block">
+                                    {% render_field form.email class="form-control is-invalid" placeholder="name@example.com" autocomplete="email" %}
+                                    <div class="invalid-feedback">
                                         {{ form.email.errors|striptags }}
                                     </div>
+                                {% else %}
+                                    {% render_field form.email class="form-control" placeholder="name@example.com" autocomplete="email" %}
                                 {% endif %}
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-md-6 mb-3 mb-md-0">
-                                {{ form.password.label_tag }} {# Use password field from Django Auth form #}
-                                {{ form.password }} {# Add class="form-control" #}
+                                <label for="{{ form.password.id_for_label }}" class="form-label">{{ form.password.label }}</label>
                                 {% if form.password.errors %}
-                                    <div class="invalid-feedback d-block">
+                                    {% render_field form.password class="form-control is-invalid" placeholder="Create a password" autocomplete="new-password" %}
+                                    <div class="invalid-feedback">
                                         {{ form.password.errors|striptags }}
                                     </div>
+                                {% else %}
+                                    {% render_field form.password class="form-control" placeholder="Create a password" autocomplete="new-password" %}
                                 {% endif %}
                             </div>
                             <div class="col-md-6">
-                                {{ form.confirm_password.label_tag }} {# Use password2 field from Django Auth form #}
-                                {{ form.confirm_password }} {# Add class="form-control" #}
+                                <label for="{{ form.confirm_password.id_for_label }}" class="form-label">{{ form.confirm_password.label }}</label>
                                 {% if form.confirm_password.errors %}
-                                    <div class="invalid-feedback d-block">
+                                    {% render_field form.confirm_password class="form-control is-invalid" placeholder="Confirm your password" autocomplete="new-password" %}
+                                    <div class="invalid-feedback">
                                         {{ form.confirm_password.errors|striptags }}
                                     </div>
+                                {% else %}
+                                    {% render_field form.confirm_password class="form-control" placeholder="Confirm your password" autocomplete="new-password" %}
                                 {% endif %}
                             </div>
                         </div>
                         <div class="mb-4">
-                            {{ form.role.label_tag }}
-                            {{ form.role }} {# Add class="form-select" #}
+                            <label for="{{ form.role.id_for_label }}" class="form-label">{{ form.role.label }}</label>
                             {% if form.role.errors %}
-                                <div class="invalid-feedback d-block">
+                                {% render_field form.role class="form-select is-invalid" %}
+                                <div class="invalid-feedback">
                                     {{ form.role.errors|striptags }}
                                 </div>
+                            {% else %}
+                                {% render_field form.role class="form-select" %}
                             {% endif %}
                         </div>
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-lg">Register</button> {# Changed button text #}
+                            <button type="submit" class="btn btn-primary btn-lg">Register</button>
                         </div>
                     </form>
                 </div>
                 <div class="card-footer text-center py-3">
-                    <div class="small">Already have an account? <a href="{% url 'portal_auth:login' %}">Login here</a></div> {# Assuming 'portal_auth:login' URL name #}
+                    <div class="small">Already have an account? <a href="{% url 'portal_auth:login' %}">Login here</a></div>
                 </div>
             </div>
         </div>

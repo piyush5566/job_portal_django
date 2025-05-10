@@ -6,13 +6,13 @@
     <div class="row mb-4">
         <div class="col-12">
             <h1>Edit Job</h1>
-            <a href="{% url 'portal_admin:jobs' %}" class="btn btn-secondary mb-3">Back to Jobs</a> {# Assuming 'portal_admin:jobs' URL name #}
+            <a href="{% url 'portal_admin:admin_jobs' %}" class="btn btn-secondary mb-3">Back to Jobs</a> {# Assuming 'portal_admin:admin_jobs' URL name #}
         </div>
     </div>
 
     <div class="card">
         <div class="card-body">
-            <form method="POST" action="{% url 'portal_admin:edit_job' job.id %}"> {# Assuming 'portal_admin:edit_job' URL name #}
+            <form method="POST" action="{% url 'portal_admin:admin_edit_job' job.id %}"> {# Assuming 'portal_admin:admin_edit_job' URL name #}
                 {% csrf_token %}
                 {# Render non-field errors if any #}
                 {% if form.non_field_errors %}

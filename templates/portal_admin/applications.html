@@ -7,7 +7,7 @@
         <div class="col-12">
             <h1>Application Management</h1>
             <p>View all job applications in the system.</p>
-            <a href="{% url 'portal_admin:dashboard' %}" class="btn btn-secondary mb-3">Back to Dashboard</a> {# Assuming 'portal_admin:dashboard' is the URL name #}
+            <a href="{% url 'portal_admin:admin_dashboard' %}" class="btn btn-secondary mb-3">Back to Dashboard</a> {# Assuming 'portal_admin:admin_dashboard' is the URL name #}
         </div>
     </div>
 
@@ -37,7 +37,7 @@
                                     {{ application.status|title }}
                                 </span>
                                 <!-- Status Update Form -->
-                                <form action="{% url 'portal_admin:update_application' application.id %}" {# Assuming 'portal_admin:update_application' URL name #}
+                                <form action="{% url 'portal_admin:admin_update_application' application.id %}" {# Assuming 'portal_admin:admin_update_application' URL name #}
                                       method="POST"
                                       class="d-inline mt-2">
                                     {% csrf_token %}
@@ -56,7 +56,7 @@
                                 </form>
                             </td>
                             <td>
-                                <a href="{% url 'jobs:detail' application.job.id %}" {# Assuming 'jobs:detail' URL name #}
+                                <a href="{% url 'jobs:job_detail' application.job.id %}" {# Assuming 'jobs:job_detail' URL name #}
                                     class="btn btn-sm btn-info">View Job</a>
                                 {% if application.resume_path %}
                                     {# Assuming resume_path is a FileField or similar #}

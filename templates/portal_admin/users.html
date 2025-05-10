@@ -7,8 +7,8 @@
         <div class="col-12">
             <h1>User Management</h1>
             <p>Manage all registered users in the system.</p>
-            <a href="{% url 'portal_admin:dashboard' %}" class="btn btn-secondary mb-3">Back to Dashboard</a> {# Assuming 'portal_admin:dashboard' URL name #}
-            <a href="{% url 'portal_admin:new_user' %}" class="btn btn-success mb-3 ms-2"><i class="fas fa-plus me-2"></i>Create New User</a> {# Assuming 'portal_admin:new_user' URL name #}
+            <a href="{% url 'portal_admin:admin_dashboard' %}" class="btn btn-secondary mb-3">Back to Dashboard</a> {# Assuming 'portal_admin:admin_dashboard' URL name #}
+            <a href="{% url 'portal_admin:admin_new_user' %}" class="btn btn-success mb-3 ms-2"><i class="fas fa-plus me-2"></i>Create New User</a> {# Assuming 'portal_admin:admin_new_user' URL name #}
         </div>
     </div>
 
@@ -33,10 +33,10 @@
                             <td>{{ user_obj.email }}</td>
                             <td>{{ user_obj.role }}</td> {# Assuming role is a field on the user model #}
                             <td>
-                                <a href="{% url 'portal_admin:edit_user' user_obj.id %}"
-                                    class="btn btn-sm btn-primary">Edit</a> {# Assuming 'portal_admin:edit_user' URL name #}
-                                <form action="{% url 'portal_admin:delete_user' user_obj.id %}" method="POST"
-                                    class="d-inline"> {# Assuming 'portal_admin:delete_user' URL name #}
+                                <a href="{% url 'portal_admin:admin_edit_user' user_obj.id %}"
+                                    class="btn btn-sm btn-primary">Edit</a> {# Assuming 'portal_admin:admin_edit_user' URL name #}
+                                <form action="{% url 'portal_admin:admin_delete_user' user_obj.id %}" method="POST"
+                                    class="d-inline"> {# Assuming 'portal_admin:admin_delete_user' URL name #}
                                     {% csrf_token %}
                                     {# Use a separate form object for delete if needed, or just CSRF token #}
                                     <button type="submit" class="btn btn-sm btn-danger"

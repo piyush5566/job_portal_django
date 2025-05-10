@@ -11,7 +11,8 @@ dependencies = [
     "django (>=5.2,<6.0)",
     "pillow (>=11.2.1,<12.0.0)",
     "python-dotenv (>=1.1.0,<2.0.0)",
-    "google-cloud-storage (>=3.1.0,<4.0.0)"
+    "google-cloud-storage (>=3.1.0,<4.0.0)",
+    "django-widget-tweaks (>=1.5.0,<2.0.0)"
 ]
 
 

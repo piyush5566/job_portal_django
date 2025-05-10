@@ -16,7 +16,7 @@
                 <div class="card-body">
                     <h5 class="card-title">User Management</h5>
                     <p class="card-text">Manage all registered users</p>
-                    <a href="{% url 'portal_admin:users' %}" class="btn btn-primary">Manage Users</a> {# Assuming 'portal_admin:users' URL name #}
+                    <a href="{% url 'portal_admin:admin_users' %}" class="btn btn-primary">Manage Users</a> {# Assuming 'portal_admin:admin_users' URL name #}
                 </div>
             </div>
         </div>
@@ -25,7 +25,7 @@
                 <div class="card-body">
                     <h5 class="card-title">Job Management</h5>
                     <p class="card-text">Manage all available jobs</p>
-                    <a href="{% url 'portal_admin:jobs' %}" class="btn btn-primary">Manage Jobs</a> {# Assuming 'portal_admin:jobs' URL name #}
+                    <a href="{% url 'portal_admin:admin_jobs' %}" class="btn btn-primary">Manage Jobs</a> {# Assuming 'portal_admin:admin_jobs' URL name #}
                 </div>
             </div>
         </div>
@@ -34,7 +34,7 @@
                 <div class="card-body">
                     <h5 class="card-title">Application Management</h5>
                     <p class="card-text">View all job applications</p>
-                    <a href="{% url 'portal_admin:applications' %}" class="btn btn-primary">View Applications</a> {# Assuming 'portal_admin:applications' URL name #}
+                    <a href="{% url 'portal_admin:admin_applications' %}" class="btn btn-primary">View Applications</a> {# Assuming 'portal_admin:admin_applications' URL name #}
                 </div>
             </div>
         </div>

@@ -3,9 +3,8 @@
 
 {% block extra_css %}
 <!-- Icon Font Stylesheet -->
-{# These might already be in base.html, include if not #}
-{# <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet"> #}
-{# <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet"> #}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css" rel="stylesheet">
 
 <!-- Libraries Stylesheet -->
 <link href="{% static 'lib/animate/animate.min.css' %}" rel="stylesheet">
@@ -93,14 +92,14 @@
 </div>
 
 <!-- Search Results Section (If using AJAX, otherwise remove or handle differently) -->
-{# <div class="container-xxl py-5" id="searchResults" style="display: none;">
+ <div class="container-xxl py-5" id="searchResults" style="display: none;">
     <div class="container">
         <h1 class="text-center mb-5 wow fadeInUp" data-wow-delay="0.1s">Search Results</h1>
         <div id="resultsContainer" class="wow fadeInUp" data-wow-delay="0.3s">
             <!-- Results will be dynamically inserted here -->
         </div>
     </div>
-</div> #}
+</div> 
 <!-- Search End -->
 
 <!-- Category Start -->
@@ -108,17 +107,31 @@
     <div class="container">
         <h1 class="text-center mb-5 wow fadeInUp" data-wow-delay="0.1s">Explore By Category</h1>
         <div class="row g-4">
-            {% for category, count in job_categories.items %} {# Assuming job_categories is a dict #}
-            <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.{{ forloop.counter0|add:1 }}s"> {# Adjusted delay logic #}
-                <a class="cat-item rounded p-4" href="{% url 'jobs:jobs_list' %}?category={{ category }}"> {# Link to filtered list #}
-                    {# Simplified icon logic - consider a mapping in view or template tags for complex cases #}
-                    <i class="fa fa-3x fa-briefcase text-primary mb-4"></i>
-                    <h6 class="mb-3">{{ category }}</h6>
-                    <p class="mb-0">{{ count }} Vacanc{{ count|pluralize:"y,ies" }}</p>
-                </a>
-            </div>
+                        {% for category_data in job_categories %}
+                <div class="col-lg-3 col-sm-6 wow fadeInUp" data-wow-delay="0.{{ forloop.counter0|add:1 }}s">
+                    <a class="cat-item rounded p-4" href="{% url 'jobs:jobs_list' %}?category={{ category_data.category }}">
+                        {% with category_lower=category_data.category|lower %}
+                        <i class="fa fa-3x 
+                            {% if 'market' in category_lower %}fa-chart-line
+                            {% elif 'information' in category_lower or 'it' == category_lower or 'tech' in category_lower %}fa-laptop-code
+                            {% elif 'human' in category_lower or 'hr' == category_lower %}fa-user-tie
+                            {% elif 'project' in category_lower or 'management' in category_lower %}fa-tasks
+                            {% elif 'sales' in category_lower or 'communication' in category_lower %}fa-hands-helping
+                            {% elif 'teach' in category_lower or 'education' in category_lower %}fa-book-reader
+                            {% elif 'design' in category_lower or 'creative' in category_lower or 'art' in category_lower %}fa-drafting-compass
+                            {% elif 'finance' in category_lower or 'account' in category_lower %}fa-calculator
+                            {% elif 'health' in category_lower or 'medical' in category_lower or 'doctor' in category_lower %}fa-heartbeat
+                            {% elif 'engineer' in category_lower %}fa-cogs
+                            {% elif 'customer' in category_lower or 'service' in category_lower or 'support' in category_lower %}fa-headset
+                            {% elif 'legal' in category_lower or 'law' in category_lower %}fa-gavel
+                            {% else %}fa-briefcase{% endif %} text-primary mb-4"></i>
+                        {% endwith %}
+                        <h6 class="mb-3">{{ category_data.category }}</h6>
+                        <p class="mb-0">{{ category_data.count }} {{ category_data.count|pluralize:"Vacancy,Vacancies" }}</p>
+                    </a>
+                </div>
             {% empty %}
-            <p class="text-center">No job categories available.</p>
+                <p class="text-center">No job categories available.</p>
             {% endfor %}
         </div>
     </div>
@@ -191,7 +204,7 @@
                                 <div class="d-flex mb-3">
                                     {# Favorite button functionality needs backend implementation #}
                                     {# <a class="btn btn-light btn-square me-3" href=""><i class="far fa-heart text-primary"></i></a> #}
-                                    <a class="btn btn-primary" href="{% url 'jobs:detail' job.id %}">Apply Now</a>
+                                    <a class="btn btn-primary" href="{% url 'jobs:job_detail' job.id %}">Apply Now</a>
                                 </div>
                                 <small class="text-truncate"><i
                                         class="far fa-calendar-alt text-primary me-2"></i>Posted: {{ job.posted_date|date:"Y-m-d" }}</small>

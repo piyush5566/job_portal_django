@@ -67,7 +67,7 @@
                                     {{ application.status|title }}
                                 </span>
                                 <!-- Status Update Form -->
-                                <form action="{% url 'employer:update_application' application.id %}" {# Assuming 'employer:update_application' URL name #}
+                                <form action="{% url 'employer:update_application_status' application.id %}"
                                       method="POST"
                                       class="d-inline mt-2">
                                     {% csrf_token %}

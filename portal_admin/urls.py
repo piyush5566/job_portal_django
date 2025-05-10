@@ -2,9 +2,11 @@
 from django.urls import path
 from . import views # Assuming you create admin/views.py
 
-app_name = 'custom_admin' # Use a distinct namespace
+app_name = 'portal_admin' # Use a distinct namespace
 
 urlpatterns = [
+    # Add index route that points to the dashboard view
+    path('', views.admin_dashboard_view, name='index'),
     path('dashboard/', views.admin_dashboard_view, name='admin_dashboard'),
     path('users/', views.admin_users_view, name='admin_users'),
     path('users/new/', views.admin_new_user_view, name='admin_new_user'),
