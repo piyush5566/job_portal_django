@@ -1,0 +1,23 @@
+{
+    "demo": {
+        "django_settings": "config.settings.prod",
+        "profile_name": "default",
+        "project_name": "job-portal",
+        "runtime": "python3.12",
+        "s3_bucket": "your-s3-bucket-name",
+        "aws_region": "us-east-1",
+        "manage_roles": true,
+        "memory_size": 512,
+        "timeout_seconds": 30,
+        "use_precompiled_packages": true,
+        "slim_handler": true,
+        "apigateway_enabled": true,
+        "keep_warm": false,
+        "lambda_description": "Job Portal Demo Application",
+        "environment_variables": {
+            "DJANGO_SETTINGS_MODULE": "config.settings.prod",
+            "AWS_STORAGE_BUCKET_NAME": "your-s3-bucket-name",
+            "SECRET_KEY": "your-secret-key-here"
+        }
+    }
+}
