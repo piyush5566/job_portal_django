@@ -194,7 +194,7 @@ class JobApplicationTests(JobsTestCase):
         self.assertTrue(any('already applied' in str(message).lower() for message in messages))
     
     def test_apply_job_post_invalid(self):
-        """Test applying for a job with no resume (should still work, resume optional)"""
+        """Test applying for a job with no resume (should show form validation error)"""
         self.login_as_job_seeker()
         
         # Apply for the job with no resume
@@ -207,8 +207,13 @@ class JobApplicationTests(JobsTestCase):
         # Check response
         self.assertEqual(response.status_code, 200)
         
-        # Check that application was created
-        self.assertTrue(
+        # Check that the form is invalid and we're still on the apply page
+        self.assertTemplateUsed(response, 'jobs/apply_job.html')
+        self.assertIn('form', response.context)
+        self.assertTrue(response.context['form'].errors)
+        
+        # Check that no application was created
+        self.assertFalse(
             Application.objects.filter(
                 job=self.job, 
                 applicant=self.job_seeker
@@ -251,3 +256,68 @@ class JobApplicationTests(JobsTestCase):
                 applicant=self.job_seeker
             ).exists()
         )
+
+
+class ModelTests(TestCase):
+    """Tests for Django models"""
+    
+    def test_job_model(self):
+        """Test creating a Job model instance"""
+        # Create an employer
+        employer = User.objects.create(
+            username='employer',
+            email='emp@example.com',
+            role='employer'
+        )
+        
+        # Create a job
+        job = Job.objects.create(
+            title='Developer',
+            description='Job desc',
+            location='New Delhi',
+            category='Software Development',
+            company='Coca Cola',
+            poster=employer
+        )
+        
+        # Check that job was created
+        retrieved_job = Job.objects.get(title='Developer')
+        self.assertEqual(retrieved_job.company, 'Coca Cola')
+        self.assertEqual(retrieved_job.poster, employer)
+    
+    def test_application_model(self):
+        """Test creating an Application model instance"""
+        # Create a job seeker
+        job_seeker = User.objects.create(
+            username='seeker',
+            email='seek@example.com',
+            role='job_seeker'
+        )
+        
+        # Create an employer
+        employer = User.objects.create(
+            username='employer2',
+            email='emp2@example.com',
+            role='employer'
+        )
+        
+        # Create a job
+        job = Job.objects.create(
+            title='QA',
+            description='QA desc',
+            location='New Delhi',
+            category='Software Development',
+            company='Coca Cola',
+            poster=employer
+        )
+        
+        # Create an application
+        application = Application.objects.create(
+            job=job,
+            applicant=job_seeker,
+            status='applied'
+        )
+        
+        # Check that application was created
+        retrieved_application = Application.objects.get(job=job, applicant=job_seeker)
+        self.assertEqual(retrieved_application.status, 'applied')

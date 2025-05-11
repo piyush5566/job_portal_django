@@ -68,6 +68,7 @@ def admin_new_user_view(request):
                 if User.objects.filter(email__iexact=email).exists():
                     logger.warning(f"Admin {admin_user.id} user creation failed: Email {email} already exists")
                     messages.error(request, 'An account with this email already exists.')
+                    return render(request, 'portal_admin/new_user.html', {'form': form})
                 else:
                     new_user = User(
                         username=username,
@@ -187,21 +188,33 @@ def admin_create_job_view(request):
         form = JobForm(request.POST, request.FILES)
         if form.is_valid():
             try:
+                # Create the job object but don't save it yet
                 job = form.save(commit=False)
                 # Admin creates job, assign poster as the admin user
                 job.poster = admin_user
+                # Now save the job to the database
                 job.save()
+                # Log success
                 logger.info(f"Admin {admin_user.id} created new job ID {job.id} ('{job.title}')")
+                # Add success message
                 messages.success(request, f'Job "{job.title}" created successfully.')
+                # Redirect to jobs list
                 return redirect('portal_admin:admin_jobs')
             except Exception as e:
+                # Log the specific error
                 logger.error(f"Admin {admin_user.id} failed to create job: {str(e)}")
-                messages.error(request, f'Failed to create job.')
+                messages.error(request, f'Failed to create job: {str(e)}')
+                # Return the form with the error
+                return render(request, 'portal_admin/create_job.html', {'form': form})
         else:
+            # Log form validation errors
             logger.warning(f"Admin {admin_user.id} create job form validation failed: {form.errors}")
             messages.error(request, 'Please correct the errors below.')
     else:
+        # GET request - create a new form
         form = JobForm()
+    
+    # Render the form
     return render(request, 'portal_admin/create_job.html', {'form': form})
 
 

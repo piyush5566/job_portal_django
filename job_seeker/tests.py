@@ -140,8 +140,8 @@ class MyApplicationsTests(JobSeekerTestCase):
         # Check that application details are in the response
         self.assertContains(response, 'Test Job')
         self.assertContains(response, 'Another Job')
-        self.assertContains(response, 'applied')
-        self.assertContains(response, 'reviewed')
+        self.assertContains(response, 'Applied')
+        self.assertContains(response, 'Reviewed')
 
 
 class JobApplicationTests(JobSeekerTestCase):
