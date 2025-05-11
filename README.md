@@ -2,7 +2,7 @@
 
 A full-featured job portal web application built with Django, allowing job seekers to find and apply for jobs, employers to post job listings, and administrators to manage the entire platform.
 
-![Job Portal](https://oco78cjc1j.execute-api.us-east-1.amazonaws.com/demo)
+![Job Portal Live Demo](https://oco78cjc1j.execute-api.us-east-1.amazonaws.com/demo)
 
 ## 🌟 Features
 
