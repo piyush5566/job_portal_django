@@ -109,10 +109,12 @@ def login_view(request):
                     messages.success(request, 'Login successful!')
                     # Redirect to 'next' URL or default
                     next_url = request.GET.get('next')
-                    # Basic security check for open redirect vulnerability
-                    if next_url and not next_url.startswith('/'):
-                        logger.warning(f"Potential open redirect attempt detected for user {user.id}. Next URL: {next_url}")
-                        next_url = reverse('main:index')
+                    # Enhanced security check for open redirect vulnerability
+                    if next_url:
+                        # Only allow internal redirects that start with / and don't have protocol/domain
+                        if not next_url.startswith('/') or '//' in next_url:
+                            logger.warning(f"Potential open redirect attempt detected for user {user.id}. Next URL: {next_url}")
+                            next_url = reverse('main:index')
                     return redirect(next_url or 'main:index')
                 else:
                     logger.warning(f"Failed login attempt (invalid password) for email {email} from IP: {remote_addr}")

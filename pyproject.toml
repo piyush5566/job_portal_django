@@ -13,7 +13,7 @@ dependencies = [
     "python-dotenv (>=1.1.0,<2.0.0)",
     "django-widget-tweaks (>=1.5.0,<2.0.0)",
     "django-storages (>=1.14.6,<2.0.0)",
-    "boto3 (>=1.38.13,<2.0.0)"
+    "boto3 (>=1.38.13,<2.0.0)",
 ]
 
 
@@ -24,6 +24,6 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.group.dev.dependencies]
 coverage = "^7.8.0"
 awscli = "^1.40.12"
-zappa = "^0.59.0"
 bandit = "^1.8.3"
+zappa = "^0.60.0"
 
