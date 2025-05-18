@@ -122,6 +122,6 @@ LOGGING = {
     'loggers': {},
 }
 
-# GCS settings (optional, enabled via environment variables)
-ENABLE_GCS_UPLOAD = os.getenv('ENABLE_GCS_UPLOAD', 'False').lower() == 'true'
-GCS_BUCKET_NAME = os.getenv('GCS_BUCKET_NAME')
+# S3 settings (optional, enabled via environment variables)
+ENABLE_S3_UPLOAD = os.getenv('ENABLE_S3_UPLOAD', 'False').lower() == 'true'
+AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')

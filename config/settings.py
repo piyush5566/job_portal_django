@@ -184,13 +184,13 @@ MESSAGE_STORAGE = 'django.contrib.messages.storage.cookie.CookieStorage'
 # CSP_IMG_SRC = ("'self'", 'data:', 'https.cdnjs.cloudflare.com', settings.MEDIA_URL) # Add MEDIA_URL
 # ... configure other CSP directives ...
 
-# GCS Settings (if using Google Cloud Storage)
-# ENABLE_GCS_UPLOAD = True # Or get from env var
-# GCS_BUCKET_NAME = 'your-gcs-bucket-name'
-# GCS_PROJECT_ID = 'your-gcp-project-id'
-# GOOGLE_APPLICATION_CREDENTIALS = '/path/to/your/service-account-key.json' # Or set env var
-# If using django-storages for GCS:
-# DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
-# GS_BUCKET_NAME = GCS_BUCKET_NAME
-# GS_PROJECT_ID = GCS_PROJECT_ID
-# GS_CREDENTIALS = ... # Service account object or path
+# S3 Settings (for AWS S3 Storage)
+# ENABLE_S3_UPLOAD = True # Or get from env var
+# AWS_STORAGE_BUCKET_NAME = 'your-s3-bucket-name'
+# AWS_S3_REGION_NAME = 'your-s3-region'
+# AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+# AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+# If using django-storages for S3:
+# DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+# AWS_S3_FILE_OVERWRITE = False
+# AWS_DEFAULT_ACL = 'private'

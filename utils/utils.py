@@ -6,8 +6,8 @@ Utility functions for the Django Job Portal application.
 This module provides various utility functions used throughout the application:
 - File handling (uploads, validation)
 - Image processing
-- Google Cloud Storage integration (direct)
-- Local/GCS file retrieval helper
+- Amazon S3 integration (direct)
+- Local/S3 file retrieval helper
 
 Note: For idiomatic Django file handling, especially with cloud storage,
 consider using model FileFields/ImageFields and the django-storages library.
@@ -25,8 +25,8 @@ from django.utils.text import get_valid_filename # Django's way to sanitize file
 # --- Assumed settings in settings.py ---
 # MEDIA_ROOT: Base directory for local media files
 # MEDIA_URL: Base URL for media files
-# GCS_BUCKET_NAME: Name of the GCS bucket (if using GCS)
-# ENABLE_GCS_UPLOAD: Boolean flag to enable GCS uploads
+# AWS_STORAGE_BUCKET_NAME: Name of the S3 bucket (if using S3)
+# ENABLE_S3_UPLOAD: Boolean flag to enable S3 uploads
 
 # --- Constants (can also be moved to settings.py) ---
 ALLOWED_RESUME_EXTENSIONS = {'pdf', 'doc', 'docx'}
@@ -34,7 +34,7 @@ ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 # Paths below are relative to MEDIA_ROOT
 PROFILE_UPLOAD_SUBDIR = 'img/profiles'
 COMPANY_LOGOS_SUBDIR = 'img/company_logos'
-RESUMES_GCS_PREFIX = 'resumes/' # Prefix used in GCS object names and local subdirs
+RESUMES_S3_PREFIX = 'resumes/' # Prefix used in S3 object names and local subdirs
 
 # Logger (uses Django's logging setup configured in settings.py)
 logger = logging.getLogger(__name__) # Use __name__ for module-specific logger
@@ -55,60 +55,67 @@ def allowed_file(filename, allowed_extensions):
     return '.' in filename and \
         filename.rsplit('.', 1)[1].lower() in allowed_extensions
 
-# --- GCS Upload Function (Directly using google-cloud-storage) ---
-def upload_to_gcs(uploaded_file: UploadedFile, user_id: int, gcs_bucket_name: str):
+# --- S3 Upload Function (Using boto3) ---
+def upload_to_s3(uploaded_file: UploadedFile, user_id: int, s3_bucket_name: str):
     """
-    Uploads a Django UploadedFile directly to Google Cloud Storage.
+    Uploads a Django UploadedFile directly to Amazon S3.
 
     Args:
         uploaded_file (UploadedFile): The file object from request.FILES.
         user_id (int): The ID of the user uploading the file.
-        gcs_bucket_name (str): The name of the target GCS bucket.
+        s3_bucket_name (str): The name of the target S3 bucket.
 
     Returns:
-        str: The GCS object name (e.g., 'resumes/123/filename.pdf') if successful,
+        str: The S3 object name (e.g., 'resumes/123/filename.pdf') if successful,
              None otherwise.
 
     Requires:
-        google-cloud-storage library installed.
+        boto3 library installed.
     """
-    # Import here to avoid dependency if GCS is not used
+    # Import here to avoid dependency if S3 is not used
     try:
-        from google.cloud import storage
+        import boto3
+        from botocore.exceptions import ClientError
     except ImportError:
-        logger.error("google-cloud-storage library not found. Cannot upload to GCS.")
+        logger.error("boto3 library not found. Cannot upload to S3.")
         return None
 
-    if not uploaded_file or not gcs_bucket_name:
-        logger.warning("upload_to_gcs: Missing uploaded_file or bucket name.")
+    if not uploaded_file or not s3_bucket_name:
+        logger.warning("upload_to_s3: Missing uploaded_file or bucket name.")
         return None
 
     if not allowed_file(uploaded_file.name, ALLOWED_RESUME_EXTENSIONS):
-        logger.warning(f"upload_to_gcs: Invalid file type attempted: {uploaded_file.name}")
+        logger.warning(f"upload_to_s3: Invalid file type attempted: {uploaded_file.name}")
         return None
 
     try:
-        # Use Django's utility for safer filenames, though GCS handles many characters
+        # Use Django's utility for safer filenames
         filename = get_valid_filename(uploaded_file.name)
-        # Construct the object name/path within GCS
-        gcs_object_name = f"{RESUMES_GCS_PREFIX}{user_id}/{filename}"
+        # Construct the object name/path within S3 - place under media/resumes/
+        s3_object_name = f"media/{RESUMES_S3_PREFIX}{user_id}/{filename}"
 
-        storage_client = storage.Client()
-        bucket = storage_client.bucket(gcs_bucket_name)
-        blob = bucket.blob(gcs_object_name)
+        # Create S3 client
+        s3_client = boto3.client('s3')
 
         # Django's UploadedFile needs to be rewound if read previously
         uploaded_file.seek(0)
 
         # Upload the file stream directly from the UploadedFile object
-        blob.upload_from_file(uploaded_file, content_type=uploaded_file.content_type)
+        s3_client.upload_fileobj(
+            uploaded_file, 
+            s3_bucket_name, 
+            s3_object_name,
+            ExtraArgs={'ContentType': uploaded_file.content_type}
+        )
 
-        logger.info(f"Successfully uploaded {filename} to GCS bucket {gcs_bucket_name} as {gcs_object_name} for user {user_id}")
-        return gcs_object_name # Return the full GCS path
+        logger.info(f"Successfully uploaded {filename} to S3 bucket {s3_bucket_name} as {s3_object_name} for user {user_id}")
+        return s3_object_name # Return the full S3 path
 
+    except ClientError as e:
+        logger.error(f"Error uploading {uploaded_file.name} to S3 for user {user_id}: {str(e)}")
+        return None
     except Exception as e:
-        logger.error(f"Error uploading {uploaded_file.name} to GCS for user {user_id}: {str(e)}")
-        # Optionally re-raise or handle specific GCS exceptions
+        logger.error(f"Unexpected error uploading {uploaded_file.name} to S3 for user {user_id}: {str(e)}")
         return None
 
 
@@ -213,14 +220,14 @@ def save_profile_picture_local(uploaded_file: UploadedFile):
         return default_picture_path
 
 
-# --- RE-INTRODUCED: Function to get resume file (local or GCS) ---
+# --- Function to get resume file (local or S3) ---
 def get_resume_file(resume_path_suffix: str):
     """
-    Ensures a resume file exists locally, downloading from GCS if necessary.
+    Ensures a resume file exists locally, downloading from S3 if necessary.
 
     Checks if the file corresponding to `resume_path_suffix` exists in the
-    local MEDIA_ROOT. If not found and GCS is enabled, attempts to download
-    it from GCS to the expected local path.
+    local MEDIA_ROOT. If not found and S3 is enabled, attempts to download
+    it from S3 to the expected local path.
 
     Args:
         resume_path_suffix (str): The path suffix as stored in the database,
@@ -234,7 +241,7 @@ def get_resume_file(resume_path_suffix: str):
 
     Note:
         This pattern (downloading to serve) can be inefficient for web requests.
-        Consider streaming responses or using signed URLs for direct GCS access
+        Consider streaming responses or using signed URLs for direct S3 access
         in views where possible. This function might be more suitable for
         background tasks or management commands needing local file access.
     """
@@ -244,7 +251,7 @@ def get_resume_file(resume_path_suffix: str):
 
     # Construct the expected absolute local path
     # Assumes resumes are stored under MEDIA_ROOT/resumes/user_id/filename.pdf
-    expected_local_path = os.path.join(settings.MEDIA_ROOT, RESUMES_GCS_PREFIX, resume_path_suffix)
+    expected_local_path = os.path.join(settings.MEDIA_ROOT, RESUMES_S3_PREFIX, resume_path_suffix)
     logger.debug(f"get_resume_file: Checking for local file at: {expected_local_path}")
 
     # 1. Check if file exists locally
@@ -252,47 +259,49 @@ def get_resume_file(resume_path_suffix: str):
         logger.info(f"get_resume_file: Found resume file locally: {expected_local_path}")
         return expected_local_path, True
 
-    # 2. If not local, check GCS configuration
-    logger.info(f"get_resume_file: File not found locally. Checking GCS config.")
-    enable_gcs = getattr(settings, 'ENABLE_GCS_UPLOAD', False)
-    gcs_bucket_name = getattr(settings, 'GCS_BUCKET_NAME', None)
+    # 2. If not local, check S3 configuration
+    logger.info(f"get_resume_file: File not found locally. Checking S3 config.")
+    enable_s3 = getattr(settings, 'ENABLE_S3_UPLOAD', False)
+    s3_bucket_name = getattr(settings, 'AWS_STORAGE_BUCKET_NAME', None)
 
-    if not enable_gcs or not gcs_bucket_name:
-        logger.warning(f"get_resume_file: Local file missing and GCS is disabled or not configured. Cannot retrieve '{resume_path_suffix}'.")
+    if not enable_s3 or not s3_bucket_name:
+        logger.warning(f"get_resume_file: Local file missing and S3 is disabled or not configured. Cannot retrieve '{resume_path_suffix}'.")
         return None, False
 
-    # 3. Attempt to download from GCS
+    # 3. Attempt to download from S3
     try:
-        # Import here to avoid dependency if GCS is not used
-        from google.cloud import storage
+        # Import here to avoid dependency if S3 is not used
+        import boto3
+        from botocore.exceptions import ClientError
     except ImportError:
-        logger.error("google-cloud-storage library not found. Cannot download from GCS.")
+        logger.error("boto3 library not found. Cannot download from S3.")
         return None, False
 
     try:
-        # Construct the full GCS object name
-        gcs_object_name = f"{RESUMES_GCS_PREFIX}{resume_path_suffix}"
-        logger.info(f"get_resume_file: Attempting to download '{gcs_object_name}' from GCS bucket '{gcs_bucket_name}' to '{expected_local_path}'")
+        # Construct the full S3 object name
+        s3_object_name = f"media/{RESUMES_S3_PREFIX}{resume_path_suffix}"
+        logger.info(f"get_resume_file: Attempting to download '{s3_object_name}' from S3 bucket '{s3_bucket_name}' to '{expected_local_path}'")
 
-        storage_client = storage.Client()
-        bucket = storage_client.bucket(gcs_bucket_name)
-        blob = bucket.blob(gcs_object_name)
+        # Create S3 client
+        s3_client = boto3.client('s3')
 
-        if blob.exists():
-            # Ensure the local directory exists before downloading
-            local_dir = os.path.dirname(expected_local_path)
-            os.makedirs(local_dir, exist_ok=True)
-            logger.debug(f"get_resume_file: Ensured local directory exists: {local_dir}")
+        # Ensure the local directory exists before downloading
+        local_dir = os.path.dirname(expected_local_path)
+        os.makedirs(local_dir, exist_ok=True)
+        logger.debug(f"get_resume_file: Ensured local directory exists: {local_dir}")
 
-            # Download the file from GCS to the expected local path
-            blob.download_to_filename(expected_local_path)
-            logger.info(f"get_resume_file: Successfully downloaded '{gcs_object_name}' from GCS to '{expected_local_path}'.")
+        # Download the file from S3 to the expected local path
+        try:
+            s3_client.download_file(s3_bucket_name, s3_object_name, expected_local_path)
+            logger.info(f"get_resume_file: Successfully downloaded '{s3_object_name}' from S3 to '{expected_local_path}'.")
             return expected_local_path, True
-        else:
-            logger.warning(f"get_resume_file: File not found in GCS bucket '{gcs_bucket_name}' with name '{gcs_object_name}'.")
+        except ClientError as e:
+            if e.response['Error']['Code'] == '404':
+                logger.warning(f"get_resume_file: File not found in S3 bucket '{s3_bucket_name}' with name '{s3_object_name}'.")
+            else:
+                logger.error(f"get_resume_file: Error retrieving file '{s3_object_name}' from S3: {str(e)}")
             return None, False
 
     except Exception as e:
-        logger.error(f"get_resume_file: Error retrieving file '{gcs_object_name}' from GCS: {str(e)}")
-        # Clean up potentially partially downloaded file? Maybe not necessary.
+        logger.error(f"get_resume_file: Unexpected error retrieving file from S3: {str(e)}")
         return None, False

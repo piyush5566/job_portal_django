@@ -13,7 +13,7 @@ from portal_auth.models import User
 from jobs.models import Job, Application
 from utils.utils import (
     allowed_file, 
-    upload_to_gcs, 
+    upload_to_s3, 
     save_company_logo_local, 
     save_profile_picture_local, 
     get_resume_file
@@ -220,65 +220,57 @@ class ProfilePictureTests(UtilsTestCase):
         return image_io.read()
 
 
-class GCSUploadTests(UtilsTestCase):
-    """Tests for Google Cloud Storage upload functions"""
+class S3UploadTests(UtilsTestCase):
+    """Tests for Amazon S3 upload functions"""
     
-    def test_upload_to_gcs_success(self):
-        """Test successful upload to GCS"""
+    def test_upload_to_s3_success(self):
+        """Test successful upload to S3"""
         # Create a test file
         resume = SimpleUploadedFile('resume.pdf', b'resume content', content_type='application/pdf')
         
-        # Mock GCS client
-        with patch('google.cloud.storage', autospec=True) as mock_storage_module:
-            mock_blob = MagicMock()
-            mock_bucket = MagicMock()
-            mock_bucket.blob.return_value = mock_blob
-            mock_client = MagicMock()
-            mock_client.bucket.return_value = mock_bucket
-            mock_storage_module.Client.return_value = mock_client
+        # Mock boto3 client
+        with patch('boto3.client') as mock_s3_client:
+            mock_client_instance = MagicMock()
+            mock_s3_client.return_value = mock_client_instance
             
             # Call the function
-            with patch('utils.utils.RESUMES_GCS_PREFIX', 'resumes/'):
-                result = upload_to_gcs(resume, self.job_seeker.id, 'test-bucket')
+            with patch('utils.utils.RESUMES_S3_PREFIX', 'resumes/'):
+                result = upload_to_s3(resume, self.job_seeker.id, 'test-bucket')
         
         # Check result
         self.assertIsNotNone(result)
         self.assertTrue(result.startswith('resumes/'))
         self.assertTrue('resume.pdf' in result)
         
-        # Check that upload_from_file was called
-        mock_blob.upload_from_file.assert_called_once()
+        # Check that upload_fileobj was called
+        mock_client_instance.upload_fileobj.assert_called_once()
     
-    def test_upload_to_gcs_invalid_type(self):
-        """Test GCS upload with invalid file type"""
+    def test_upload_to_s3_invalid_type(self):
+        """Test S3 upload with invalid file type"""
         # Create an invalid file
         resume = SimpleUploadedFile('resume.exe', b'exe content', content_type='application/octet-stream')
         
         # Call the function
         with patch('utils.utils.ALLOWED_RESUME_EXTENSIONS', {'pdf', 'doc', 'docx'}):
-            result = upload_to_gcs(resume, self.job_seeker.id, 'test-bucket')
+            result = upload_to_s3(resume, self.job_seeker.id, 'test-bucket')
         
         # Check result
         self.assertIsNone(result)
     
-    def test_upload_to_gcs_exception(self):
-        """Test GCS upload with exception"""
+    def test_upload_to_s3_exception(self):
+        """Test S3 upload with exception"""
         # Create a test file
         resume = SimpleUploadedFile('resume.pdf', b'resume content', content_type='application/pdf')
         
-        # Mock GCS client to raise an exception
-        with patch('google.cloud.storage', autospec=True) as mock_storage_module:
-            mock_blob = MagicMock()
-            mock_blob.upload_from_file.side_effect = Exception('GCS error')
-            mock_bucket = MagicMock()
-            mock_bucket.blob.return_value = mock_blob
-            mock_client = MagicMock()
-            mock_client.bucket.return_value = mock_bucket
-            mock_storage_module.Client.return_value = mock_client
+        # Mock boto3 client to raise an exception
+        with patch('boto3.client') as mock_s3_client:
+            mock_client_instance = MagicMock()
+            mock_client_instance.upload_fileobj.side_effect = Exception('S3 error')
+            mock_s3_client.return_value = mock_client_instance
             
             # Call the function
-            with patch('utils.utils.RESUMES_GCS_PREFIX', 'resumes/'):
-                result = upload_to_gcs(resume, self.job_seeker.id, 'test-bucket')
+            with patch('utils.utils.RESUMES_S3_PREFIX', 'resumes/'):
+                result = upload_to_s3(resume, self.job_seeker.id, 'test-bucket')
         
         # Check result
         self.assertIsNone(result)
@@ -298,46 +290,41 @@ class ResumeFileTests(UtilsTestCase):
         
         # Get the resume file with direct patching of settings.MEDIA_ROOT
         with patch('django.conf.settings.MEDIA_ROOT', self.temp_media_root):
-            with patch('utils.utils.RESUMES_GCS_PREFIX', 'resumes/'):
+            with patch('utils.utils.RESUMES_S3_PREFIX', 'resumes/'):
                 file_path, success = get_resume_file('1/resume.pdf')
         
         # Check result
         self.assertEqual(file_path, os.path.join(self.temp_upload_folder, '1/resume.pdf'))
         self.assertTrue(success)
     
-    def test_get_resume_file_gcs(self):
-        """Test getting a resume file from GCS"""
-        # Mock GCS client
+    def test_get_resume_file_s3(self):
+        """Test getting a resume file from S3"""
+        # Mock boto3 client
         with patch('django.conf.settings.MEDIA_ROOT', self.temp_media_root):
-            with patch('google.cloud.storage', autospec=True) as mock_storage_module:
-                # Set up the mock chain
-                mock_blob = MagicMock()
-                mock_blob.exists.return_value = True
-                mock_bucket = MagicMock()
-                mock_bucket.blob.return_value = mock_blob
-                mock_client = MagicMock()
-                mock_client.bucket.return_value = mock_bucket
-                mock_storage_module.Client.return_value = mock_client
+            with patch('boto3.client') as mock_s3_client:
+                # Set up the mock client
+                mock_client_instance = MagicMock()
+                mock_s3_client.return_value = mock_client_instance
                 
                 # Call the function
-                with patch('utils.utils.RESUMES_GCS_PREFIX', 'resumes/'):
-                    with patch.object(settings, 'ENABLE_GCS_UPLOAD', True):
-                        with patch.object(settings, 'GCS_BUCKET_NAME', 'test-bucket'):
+                with patch('utils.utils.RESUMES_S3_PREFIX', 'resumes/'):
+                    with patch.object(settings, 'ENABLE_S3_UPLOAD', True):
+                        with patch.object(settings, 'AWS_STORAGE_BUCKET_NAME', 'test-bucket'):
                             file_path, success = get_resume_file('1/resume.pdf')
         
         # Check result
         self.assertEqual(file_path, os.path.join(self.temp_upload_folder, '1/resume.pdf'))
         self.assertTrue(success)
         
-        # Check that download_to_filename was called
-        mock_blob.download_to_filename.assert_called_once()
+        # Check that download_file was called
+        mock_client_instance.download_file.assert_called_once()
     
     def test_get_resume_file_not_found(self):
         """Test getting a resume file that doesn't exist"""
         # Call the function with a direct patch of settings.MEDIA_ROOT
         with patch('django.conf.settings.MEDIA_ROOT', self.temp_media_root):
-            with patch('utils.utils.RESUMES_GCS_PREFIX', 'resumes/'):
-                with patch.object(settings, 'ENABLE_GCS_UPLOAD', False):
+            with patch('utils.utils.RESUMES_S3_PREFIX', 'resumes/'):
+                with patch.object(settings, 'ENABLE_S3_UPLOAD', False):
                     file_path, success = get_resume_file('nonexistent.pdf')
         
         # Check result
@@ -441,7 +428,7 @@ class ResumeViewTests(UtilsTestCase):
         
         # Try to access the resume without creating a duplicate application
         with patch('utils.views.settings.MEDIA_ROOT', self.temp_media_root):
-            with patch.object(settings, 'ENABLE_GCS_UPLOAD', False):
+            with patch.object(settings, 'ENABLE_S3_UPLOAD', False):
                 response = self.client.get(reverse('utils:serve_resume', kwargs={'cs_suffix': nonexistent_resume_path}))
         
         # Check response

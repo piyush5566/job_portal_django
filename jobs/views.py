@@ -13,7 +13,7 @@ from .models import Job, Application
 from .forms import ApplicationForm
 # Import decorators from auth app
 from portal_auth.views import login_required, role_required
-from utils.utils import upload_to_gcs # Import GCS upload utility function
+from utils.utils import upload_to_s3 # Import S3 upload utility function
 logger = logging.getLogger(__name__) # Setup logger for this module
 # --- Views ---
 
@@ -121,7 +121,7 @@ def job_detail_view(request, job_id):
 @role_required('job_seeker')
 def apply_job_view(request, job_id):
     """
-    Handle job application submissions by job seekers, including GCS resume upload.
+    Handle job application submissions by job seekers, including S3 resume upload.
     Equivalent to Flask's apply_job route.
     """
     job = get_object_or_404(Job, pk=job_id)
@@ -140,45 +140,45 @@ def apply_job_view(request, job_id):
         form = ApplicationForm(request.POST, request.FILES)
         if form.is_valid():
             resume_path_for_db = None # Path to store in DB (without 'resumes/' prefix)
-            gcs_upload_successful = True # Assume success if no file or GCS disabled
+            s3_upload_successful = True # Assume success if no file or S3 disabled
 
             try:
                 # --- Handle Resume Upload ---
                 resume_file = form.cleaned_data.get('resume')
                 if resume_file:
-                    # Check config if GCS should be used
+                    # Check config if S3 should be used
                     # Use getattr for safer access to settings
-                    enable_gcs = getattr(settings, 'ENABLE_GCS_UPLOAD', False)
-                    gcs_bucket_name = getattr(settings, 'GCS_BUCKET_NAME', None)
+                    enable_s3 = getattr(settings, 'ENABLE_S3_UPLOAD', False)
+                    s3_bucket_name = getattr(settings, 'AWS_STORAGE_BUCKET_NAME', None)
 
-                    if enable_gcs and gcs_bucket_name:
-                        logger.info(f"Attempting GCS upload for application to job {job_id} by user {user.id}")
-                        # Attempt direct upload to GCS using the utility function
-                        # Assumes upload_to_gcs takes Django's UploadedFile, user ID, bucket name
+                    if enable_s3 and s3_bucket_name:
+                        logger.info(f"Attempting S3 upload for application to job {job_id} by user {user.id}")
+                        # Attempt direct upload to S3 using the utility function
+                        # Assumes upload_to_s3 takes Django's UploadedFile, user ID, bucket name
                         # and returns the full object name like 'resumes/123/file.pdf' or None
-                        gcs_object_name = upload_to_gcs(
-                            file_storage=resume_file,
+                        s3_object_name = upload_to_s3(
+                            uploaded_file=resume_file,
                             user_id=user.id,
-                            gcs_bucket_name=gcs_bucket_name
+                            s3_bucket_name=s3_bucket_name
                         )
 
-                        if gcs_object_name:
-                            # Store GCS path *without* the leading 'resumes/' prefix
-                            resume_path_for_db = gcs_object_name.removeprefix('resumes/')
-                            logger.info(f"GCS upload successful for job {job_id}, user {user.id}. DB Path: {resume_path_for_db}")
+                        if s3_object_name:
+                            # Store S3 path *without* the leading 'media/resumes/' prefix
+                            resume_path_for_db = s3_object_name.removeprefix('media/resumes/')
+                            logger.info(f"S3 upload successful for job {job_id}, user {user.id}. DB Path: {resume_path_for_db}")
                         else:
-                            # GCS upload failed
-                            gcs_upload_successful = False
-                            logger.error(f"GCS upload failed for job {job_id}, user {user.id}")
+                            # S3 upload failed
+                            s3_upload_successful = False
+                            logger.error(f"S3 upload failed for job {job_id}, user {user.id}")
                             messages.error(request, 'There was an error uploading your resume to cloud storage. Please try again.')
-                            # Stay on the page if GCS upload fails
+                            # Stay on the page if S3 upload fails
                     else:
-                        # GCS not enabled, handle locally (or disallow?)
-                        logger.warning(f"Resume provided for job {job_id}, user {user.id}, but GCS upload is disabled or bucket not configured. Resume not saved.")
+                        # S3 not enabled, handle locally (or disallow?)
+                        logger.warning(f"Resume provided for job {job_id}, user {user.id}, but S3 upload is disabled or bucket not configured. Resume not saved.")
                         resume_path_for_db = None
 
-                # --- Create Application Record (only if GCS upload was successful or no resume) ---
-                if gcs_upload_successful:
+                # --- Create Application Record (only if S3 upload was successful or no resume) ---
+                if s3_upload_successful:
                     application = Application(
                         job=job,
                         applicant=user,

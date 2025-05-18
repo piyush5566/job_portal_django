@@ -49,8 +49,7 @@
                                 <i class="fa fa-eye me-2"></i>View Job
                             </a>
                             {% if application.resume_path %}
-                                {# Assuming resume_path is a FileField #}
-                                <a href="{{ application.resume_path.url }}" class="btn btn-primary mb-2"
+                                <a href="{% url 'utils:serve_resume' cs_suffix=application.resume_path %}" class="btn btn-primary mb-2"
                                     target="_blank">
                                     <i class="fa fa-file-pdf me-2"></i>View Resume
                                 </a>

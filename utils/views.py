@@ -6,7 +6,8 @@ from django.conf import settings
 import os
 import io
 import logging # Import logging
-from google.cloud import storage
+import boto3
+from botocore.exceptions import ClientError
 
 # Import models from the 'jobs' app
 from jobs.models import Application
@@ -20,17 +21,17 @@ logger = logging.getLogger(__name__) # Get logger for this module
 @login_required
 def serve_resume_view(request, cs_suffix):
     """
-    Securely serve resume files, checking local storage first, then GCS.
+    Securely serve resume files, checking local storage first, then S3.
 
     Args:
-        cs_suffix (str): The suffix of the GCS object name or local path
+        cs_suffix (str): The suffix of the S3 object name or local path
                           (e.g., 'user_id/filename.pdf').
 
     Returns:
-        FileResponse: The requested resume file streamed from local disk or GCS.
+        FileResponse: The requested resume file streamed from local disk or S3.
         HttpResponseForbidden: 403 if unauthorized.
         Http404 Exception: Raised if the file is not found in either location
-                           or if GCS is needed but not configured/available.
+                           or if S3 is needed but not configured/available.
         500 Error: On unexpected server errors during file access/retrieval.
 
     Access Rules:
@@ -43,7 +44,10 @@ def serve_resume_view(request, cs_suffix):
 
     # Find the application associated with this path suffix.
     # Assumes resume_path stores path suffix like 'user_id/file.pdf'
-    application = get_object_or_404(Application.objects.select_related('job', 'applicant'), resume_path=cs_suffix)
+    # Use filter().first() instead of get() to handle multiple applications with the same resume
+    application = Application.objects.select_related('job', 'applicant').filter(resume_path=cs_suffix).first()
+    if not application:
+        raise Http404("Application not found")
     # Note: get_object_or_404 handles the 'not found' case for the application record
 
     # --- Permission Checks ---
@@ -87,40 +91,47 @@ def serve_resume_view(request, cs_suffix):
             # Let Django handle this as a 500, or raise a specific 500 exception
             raise # Re-raise the exception to trigger a 500 error
 
-    logger.info(f"Resume file '{cs_suffix}' not found locally. Attempting GCS fetch.")
+    logger.info(f"Resume file '{cs_suffix}' not found locally. Attempting S3 fetch.")
 
-    # --- 2. If Not Found Locally, Attempt to Fetch from GCS ---
-    enable_gcs_setting = getattr(settings, 'ENABLE_GCS_UPLOAD', False)
-    gcs_bucket_name = getattr(settings, 'GCS_BUCKET_NAME', None)
+    # --- 2. If Not Found Locally, Attempt to Fetch from S3 ---
+    enable_s3_setting = getattr(settings, 'ENABLE_S3_UPLOAD', False)
+    s3_bucket_name = getattr(settings, 'AWS_STORAGE_BUCKET_NAME', None)
 
-    # Check if GCS is configured in settings AND library was imported
-    if not enable_gcs_setting or not gcs_bucket_name:
-        log_reason = "GCS not enabled or bucket not configured in settings"
-        logger.warning(f"Local file '{cs_suffix}' not found and cannot fetch from GCS ({log_reason}). Cannot serve resume.")
-        raise Http404("Resume file not found.") # Not found locally, GCS unavailable -> 404
+    # Check if S3 is configured in settings
+    if not enable_s3_setting or not s3_bucket_name:
+        log_reason = "S3 not enabled or bucket not configured in settings"
+        logger.warning(f"Local file '{cs_suffix}' not found and cannot fetch from S3 ({log_reason}). Cannot serve resume.")
+        raise Http404("Resume file not found.") # Not found locally, S3 unavailable -> 404
 
-    # --- Proceed with GCS Fetch ---
+    # --- Proceed with S3 Fetch ---
     try:
-        # Construct the full GCS object name (assuming 'resumes/' prefix)
-        gcs_object_name = f"resumes/{cs_suffix}"
-        logger.info(f"Attempting to serve resume '{gcs_object_name}' from GCS bucket '{gcs_bucket_name}'.")
+        # Construct the full S3 object name (assuming 'media/resumes/' prefix)
+        s3_object_name = f"media/resumes/{cs_suffix}"
+        logger.info(f"Attempting to serve resume '{s3_object_name}' from S3 bucket '{s3_bucket_name}'.")
 
-        storage_client = storage.Client()
-        bucket = storage_client.bucket(gcs_bucket_name)
-        blob = bucket.blob(gcs_object_name)
-
-        if not blob.exists():
-            logger.warning(f"Resume file not found locally or in GCS: {gcs_object_name}")
-            raise Http404("Resume file not found.") # Not found in GCS either -> 404
+        # Create S3 client
+        s3_client = boto3.client('s3')
+        
+        try:
+            # Check if object exists by attempting to get its metadata
+            s3_client.head_object(Bucket=s3_bucket_name, Key=s3_object_name)
+        except ClientError as e:
+            if e.response['Error']['Code'] == '404':
+                logger.warning(f"Resume file not found locally or in S3: {s3_object_name}")
+                raise Http404("Resume file not found.") # Not found in S3 either -> 404
+            else:
+                # Other error occurred
+                raise
 
         # Download blob content into memory
-        file_bytes = blob.download_as_bytes()
+        response = s3_client.get_object(Bucket=s3_bucket_name, Key=s3_object_name)
+        file_bytes = response['Body'].read()
         file_stream = io.BytesIO(file_bytes)
 
         # Extract original filename for download prompt
         original_filename = os.path.basename(cs_suffix)
 
-        logger.info(f"Resume file {gcs_object_name} successfully retrieved from GCS and serving.")
+        logger.info(f"Resume file {s3_object_name} successfully retrieved from S3 and serving.")
         # Send the file from the in-memory stream
         response = FileResponse(
             file_stream,
@@ -131,8 +142,8 @@ def serve_resume_view(request, cs_suffix):
         return response
 
     except Exception as e:
-        logger.error(f"Error retrieving file '{gcs_object_name}' from GCS after local check failed: {str(e)}")
-        # Treat GCS errors as server errors after confirming local absence
+        logger.error(f"Error retrieving file '{s3_object_name}' from S3 after local check failed: {str(e)}")
+        # Treat S3 errors as server errors after confirming local absence
         raise Http404("Error serving resume file from storage.") # Or raise e for 500
 
 
